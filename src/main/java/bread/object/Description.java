@@ -1,9 +1,15 @@
 package bread.object;
 
-public class Description {
+import org.immutables.value.Value;
+
+@Value.Immutable
+public interface Description {
     enum Format {
         XHTML,
         TEXT,
-
+        MARKDOWN
     }
+
+    Format getFormat();
+    String getValue();
 }
