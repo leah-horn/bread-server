@@ -5,11 +5,19 @@
          version="3.1">
     <servlet>
         <servlet-name>api</servlet-name>
-        <servlet-class>bread.application.BreadApplication</servlet-class>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>bread.application.BreadApplication</param-value>
+        </init-param>
     </servlet>
     <servlet>
         <servlet-name>health</servlet-name>
-        <servlet-class>bread.application.HealthApplication</servlet-class>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>bread.application.HealthApplication</param-value>
+        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>api</servlet-name>

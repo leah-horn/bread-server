@@ -21,6 +21,11 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>bread</groupId>
+            <artifactId>bread-service</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
             <scope>test</scope>
