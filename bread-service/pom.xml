@@ -36,6 +36,16 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-jaxrs2</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-jaxrs2-servlet-initializer-v2</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>javax.measure</groupId>
             <artifactId>unit-api</artifactId>
             <scope>compile</scope>
@@ -96,4 +106,28 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <!--
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.github.kongchen</groupId>
+        <artifactId>swagger-maven-plugin</artifactId>
+        <configuration>
+          <apiSources>
+            <apiSource>
+              <locations>
+                <location>bread.resource</location>
+              </locations>
+              <info>
+                <title>Bread Service</title>
+                <version>1</version>
+              </info>
+              <swaggerDirectory>${basedir}/src/etc/swagger-ui</swaggerDirectory>
+            </apiSource>
+          </apiSources>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  -->
 </project>

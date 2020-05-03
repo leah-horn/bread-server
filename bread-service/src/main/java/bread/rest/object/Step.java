@@ -3,9 +3,7 @@ package bread.rest.object;
 import org.immutables.value.Value;
 
 @Value.Immutable
-public interface User {
+public interface Step {
 
-  String getDisplayName();
-
-  String getEmail();
+  String getDescription();
 }

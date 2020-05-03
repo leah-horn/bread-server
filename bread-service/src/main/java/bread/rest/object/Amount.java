@@ -3,9 +3,9 @@ package bread.rest.object;
 import org.immutables.value.Value;
 
 @Value.Immutable
-public interface User {
+public interface Amount {
 
-  String getDisplayName();
+  long getQuantity();
 
-  String getEmail();
+  String getUnitName();
 }
