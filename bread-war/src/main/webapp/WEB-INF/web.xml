@@ -27,4 +27,37 @@
     <servlet-name>health</servlet-name>
     <url-pattern>/meta/health/*</url-pattern>
   </servlet-mapping>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>recipe creation</web-resource-name>
+      <url-pattern>/api/recipe/*</url-pattern>
+      <http-method>POST</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>admin</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>recipe view</web-resource-name>
+      <url-pattern>/api/recipe/*</url-pattern>
+      <http-method>GET</http-method>
+    </web-resource-collection>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>generic view</web-resource-name>
+      <url-pattern>/api/*</url-pattern>
+      <http-method>GET</http-method>
+    </web-resource-collection>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
 </web-app>
