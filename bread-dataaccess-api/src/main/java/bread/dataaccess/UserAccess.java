@@ -6,7 +6,7 @@ import org.jvnet.hk2.annotations.Contract;
 @Contract
 public interface UserAccess {
 
-  User retrieve(String username, char[] password);
-  boolean create(User newUser);
+  User retrieve(String email, char[] password);
+  boolean create(User newUser, char[] password);
 
 }
