@@ -2,8 +2,11 @@ package bread.dataaccess.fs;
 
 import bread.dataaccess.UserAccess;
 import bread.object.ImmutableUser;
+import bread.object.Roles;
 import bread.object.User;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -13,7 +16,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.ws.rs.NotFoundException;
 import org.apache.commons.io.FileUtils;
@@ -24,6 +30,7 @@ public class UserAccessImpl implements UserAccess {
 
   private final static File sourceFile;
   private final static File passwordFile;
+  private final static File authorizationsFile;
 
   static {
     File breadServiceFolder = FileUtils.getFile(FileUtils.getUserDirectory(), "bread-service");
@@ -32,30 +39,32 @@ public class UserAccessImpl implements UserAccess {
     } else if (!breadServiceFolder.isDirectory()) {
       throw new RuntimeException(breadServiceFolder.getAbsolutePath() + " is not a directory");
     }
-    passwordFile = FileUtils.getFile(breadServiceFolder, "user_passwords.yaml");
-    if (!passwordFile.exists()) {
-      try {
-        passwordFile.createNewFile();
-      } catch (IOException e) {
-        throw new RuntimeException(
-            "Could not create user password file " + passwordFile.getAbsolutePath(), e);
-      }
-    } else if (!passwordFile.isFile()) {
-      throw new RuntimeException(passwordFile.getAbsolutePath() + " exists but is not a file");
-    }
 
-    sourceFile = FileUtils.getFile(breadServiceFolder, "user.yaml");
-    if (!sourceFile.exists()) {
+    // Create local source files if needed, otherwise use existing yaml from previous sessions. sourceFile should be initialized
+    // last, since it relies on the password and authorizations files existing. This implementation is a series of awful hacks
+    passwordFile = createFileIfNonExistent(breadServiceFolder, "user_passwords.yaml", null);
+    authorizationsFile = createFileIfNonExistent(breadServiceFolder, "user_passwords.yaml", null);
+    sourceFile = createFileIfNonExistent(breadServiceFolder, "user.yaml",
+        UserAccessImpl::createDummyUserDocument);
+  }
+
+  private static File createFileIfNonExistent(File breadServiceFolder, String filename,
+      Runnable afterCreate) {
+    File newFile = FileUtils.getFile(breadServiceFolder, filename);
+    if (!newFile.exists()) {
       try {
-        sourceFile.createNewFile();
-        createDummyUserDocument();
+        newFile.createNewFile();
+        if (afterCreate != null) {
+          afterCreate.run();
+        }
       } catch (IOException e) {
         throw new RuntimeException(
-            "Could not create user data file " + sourceFile.getAbsolutePath(), e);
+            "Could not create user password file " + newFile.getAbsolutePath(), e);
       }
-    } else if (!sourceFile.isFile()) {
-      throw new RuntimeException(sourceFile.getAbsolutePath() + " exists but is not a file");
+    } else if (!newFile.isFile()) {
+      throw new RuntimeException(newFile.getAbsolutePath() + " exists but is not a file");
     }
+    return newFile;
   }
 
   public UserAccessImpl() {
@@ -121,7 +130,28 @@ public class UserAccessImpl implements UserAccess {
     }
   }
 
-  private static void createDummyUserDocument() throws IOException {
+  @Override
+  public Collection<Roles> retrieveAuthorizations(String email) {
+    ObjectMapper mapper = new ObjectMapper(
+        new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER));
+    try {
+      CollectionType rolesList = TypeFactory.defaultInstance()
+          .constructCollectionType(List.class, Roles.class);
+      JavaType stringType = TypeFactory.defaultInstance().constructSimpleType(String.class, null);
+      MapType typeReference = TypeFactory.defaultInstance()
+          .constructMapType(HashMap.class, stringType, rolesList);
+
+      Map<String, List<Roles>> authorizationData = mapper.readValue(sourceFile, typeReference);
+      if (!authorizationData.containsKey(email)) {
+        return Collections.EMPTY_LIST;
+      }
+      return authorizationData.get(email);
+    } catch (IOException e) {
+      throw new RuntimeException("Could not retrieve authorizations for user " + email);
+    }
+  }
+
+  private static void createDummyUserDocument() {
     ObjectMapper mapper = new ObjectMapper(
         new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER));
     Map<String, User> users = new HashMap<>();
@@ -131,9 +161,13 @@ public class UserAccessImpl implements UserAccess {
         .isAuthorized(false)
         .isAccountLocked(true)
         .build());
-    mapper.writeValue(sourceFile, users);
-    Map<String, String> passwords = new HashMap<>();
-    passwords.put("dummy_user", "dummy_password");
-    mapper.writeValue(passwordFile, passwords);
+    try {
+      mapper.writeValue(sourceFile, users);
+      Map<String, String> passwords = new HashMap<>();
+      passwords.put("dummy_user", "dummy_password");
+      mapper.writeValue(passwordFile, passwords);
+    } catch (IOException e) {
+      throw new RuntimeException("Could not write dummy details to file");
+    }
   }
 }

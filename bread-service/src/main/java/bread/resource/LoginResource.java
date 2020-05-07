@@ -15,7 +15,8 @@ public class LoginResource {
 
   @Path("/login")
   @POST
-  public String login(@HeaderParam("username") String username, @HeaderParam("password") char[] password) {
+  public String login(@HeaderParam("username") String username,
+      @HeaderParam("password") char[] password) {
 
     Subject currentUser = SecurityUtils.getSubject();
 

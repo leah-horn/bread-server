@@ -11,10 +11,15 @@ import org.immutables.value.Value;
 public interface User {
 
   List<Token> getTokens();
+
   String getEmail();
+
   String getDisplayName();
+
   boolean isAuthorized();
+
   boolean isAccountLocked();
+
   List<String> getRoles();
 
 }
