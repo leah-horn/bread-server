@@ -1,15 +1,19 @@
 package bread.application;
 
+import bread.binder.AuthBinder;
+import bread.resource.LoginResource;
 import bread.resource.RecipeResource;
 import bread.resource.UserResource;
-import com.google.common.collect.ImmutableSet;
-import java.util.Set;
-import javax.ws.rs.core.Application;
+import org.glassfish.jersey.server.ResourceConfig;
 
-public class BreadApplication extends Application {
+public class BreadApplication extends ResourceConfig {
 
-  @Override
-  public Set<Class<?>> getClasses() {
-    return ImmutableSet.of(UserResource.class, RecipeResource.class);
+  public BreadApplication() {
+    super();
+    register(UserResource.class)
+      .register(RecipeResource.class)
+      .register(UserResource.class)
+      .register(LoginResource.class)
+      .register(new AuthBinder());
   }
 }

@@ -32,9 +32,11 @@ public class BreadAuth extends AuthorizingRealm {
   @Override
   protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token)
       throws AuthenticationException {
+    // If no token was provided, no auth info can be found
     if (token == null) {
       return null;
     }
+
     UsernamePasswordToken upToken = (UsernamePasswordToken) token;
     User user = userAccess.retrieve(upToken.getUsername(), upToken.getPassword());
     if (!user.isAuthorized() || user.isAccountLocked()) {
