@@ -12,6 +12,7 @@ import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
@@ -36,18 +37,21 @@ public class BreadAuth extends AuthorizingRealm {
     if (token == null) {
       return null;
     }
+    try {
+      UsernamePasswordToken upToken = (UsernamePasswordToken) token;
+      User user = userAccess.retrieve(upToken.getUsername(), upToken.getPassword());
+      if (!user.isAuthorized() || user.isAccountLocked()) {
+        throw new NotAuthorizedException("User credentials not valid");
+      }
 
-    UsernamePasswordToken upToken = (UsernamePasswordToken) token;
-    User user = userAccess.retrieve(upToken.getUsername(), upToken.getPassword());
-    if (!user.isAuthorized() || user.isAccountLocked()) {
-      throw new NotAuthorizedException("User credentials not valid");
+      SimplePrincipalCollection principles = new SimplePrincipalCollection(user.getEmail(),
+          REALM_NAME);
+      SimpleAuthenticationInfo authenticationInfo = new SimpleAuthenticationInfo(principles,
+          upToken.getPassword());
+      return authenticationInfo;
+    } catch (Exception e) {
+      throw new AuthorizationException(e);
     }
-
-    SimplePrincipalCollection principles = new SimplePrincipalCollection(user.getEmail(),
-        REALM_NAME);
-    SimpleAuthenticationInfo authenticationInfo = new SimpleAuthenticationInfo(principles,
-        upToken.getPassword());
-    return authenticationInfo;
   }
 
   @Override

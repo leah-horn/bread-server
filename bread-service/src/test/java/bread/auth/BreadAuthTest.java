@@ -1,6 +1,7 @@
 package bread.auth;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
@@ -15,6 +16,7 @@ import java.util.Collections;
 import javax.ws.rs.NotAuthorizedException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
@@ -75,9 +77,9 @@ public class BreadAuthTest {
     when(userAccessService.retrieve(USERNAME, PASSWORD))
         .thenReturn(ImmutableUser.copyOf(DEFAULT_USER_RESPONSE)
             .withIsAuthorized(false));
-    NotAuthorizedException expected = assertThrows(NotAuthorizedException.class,
+    AuthorizationException expected = assertThrows(AuthorizationException.class,
         () -> testInstance.doGetAuthenticationInfo(TOKEN));
-    assertThat(expected.getResponse().getStatus(), equalTo(401));
+    assertThat(expected.getMessage(), containsString("Unauthorized"));
   }
 
   @Test
@@ -85,9 +87,9 @@ public class BreadAuthTest {
     when(userAccessService.retrieve(USERNAME, PASSWORD))
         .thenReturn(ImmutableUser.copyOf(DEFAULT_USER_RESPONSE)
             .withIsAccountLocked(true));
-    NotAuthorizedException expected = assertThrows(NotAuthorizedException.class,
+    AuthorizationException expected = assertThrows(AuthorizationException.class,
         () -> testInstance.doGetAuthenticationInfo(TOKEN));
-    assertThat(expected.getResponse().getStatus(), equalTo(401));
+    assertThat(expected.getMessage(), containsString("Unauthorized"));
   }
 
   @Test

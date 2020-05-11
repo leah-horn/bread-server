@@ -1,6 +1,8 @@
 package bread.application;
 
 import bread.binder.AuthBinder;
+import bread.dataaccess.fs.BreadFsBinder;
+import bread.filter.CORSFilter;
 import bread.resource.LoginResource;
 import bread.resource.RecipeResource;
 import bread.resource.UserResource;
@@ -14,6 +16,9 @@ public class BreadApplication extends ResourceConfig {
       .register(RecipeResource.class)
       .register(UserResource.class)
       .register(LoginResource.class)
-      .register(new AuthBinder());
+      .register(new AuthBinder())
+      .register(CORSFilter.class)
+          // TODO perhaps this one can be moved after compile time?
+      .register(new BreadFsBinder());
   }
 }

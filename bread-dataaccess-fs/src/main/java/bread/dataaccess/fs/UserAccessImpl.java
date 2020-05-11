@@ -16,6 +16,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -95,7 +97,7 @@ public class UserAccessImpl implements UserAccess {
         }
         User savedUser = userData.get(email);
         return ImmutableUser.builder().from(savedUser)
-            .isAuthorized(passwords.get(email).equals(password))
+            .isAuthorized(password != null && passwords.get(email).equals(new String(password)))
             .build();
       } catch (FileNotFoundException e) {
         throw new RuntimeException(e);

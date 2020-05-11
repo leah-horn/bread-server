@@ -1,11 +1,15 @@
 package bread.resource;
 
 import java.util.Arrays;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
@@ -15,21 +19,18 @@ public class LoginResource {
 
   @Path("/login")
   @POST
-  public String login(@HeaderParam("username") String username,
-      @HeaderParam("password") char[] password) {
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  public void login(@HeaderParam("username") String username,
+      @HeaderParam("password") String password, @FormParam("remember-me") boolean rememberMe) {
 
     Subject currentUser = SecurityUtils.getSubject();
 
-    if (username.equals("test") && Arrays.equals(password, "password".toCharArray())) {
-      UsernamePasswordToken token = new UsernamePasswordToken("username", "password");
-      Arrays.fill(password, '\0');
+    if (!currentUser.isAuthenticated()) {
+      UsernamePasswordToken token = new UsernamePasswordToken(username, password);
+      //Arrays.fill(password, '\0'); TODO would be nice to not keep this around in memory
 
-      token.setRememberMe(true);
+      token.setRememberMe(rememberMe);
       currentUser.login(token);
-
-      return "";
-    } else {
-      throw new NotAuthorizedException("Could not log in");
     }
   }
 
